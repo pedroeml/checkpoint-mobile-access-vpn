@@ -1,8 +1,8 @@
-# Linux setup Checkpoint Mobile Access VPN
+# Linux setup Check Point Mobile Access VPN
 
-<div style="text-align:center">
+<p align="center">
     <img style="background-color:white" src="https://www.checkpoint.com/wp-content/themes/checkpoint-theme-v2/images/cp-logo-3x.png.pagespeed.ce.giMz7NxZUR.png"></img>
-</div>
+</p>
 
 This is a step-by-step tutorial to setup your Linux machine with all the required dependencies to work with [Check Point Mobile Access VPN](https://www.checkpoint.com/products/mobile-access/). This tutorial also includes some troubleshooting.
 
@@ -68,9 +68,9 @@ $ sudo apt-get install multiarch-support
 $ sudo apt-get install libc6:i386 libncurses5:i386 libstdc++6:i386 libstdc++5:i386 libpam0g:i386
 ```
 
-## Shell Scripts
+## Downloading the Shell Scripts
 
-There are two `sh` scripts you'll need to download to setup Check Point Mobile Access VPN on your machine:
+There are two shell script files you'll need to download to setup Check Point Mobile Access VPN on your machine:
 
 - `snx_install.sh`
 - `cshell_install.sh`
@@ -79,19 +79,97 @@ Both of them you can get on your company's Mobile Access VPN page.
 
 ### 1. Login
 
-<div style="text-align:center">
+<p align="center">
     <img src="login.png"></img>
-</div>
+</p>
 
 
 ### 2. Click on "Settings" button
-<div style="text-align:center">
+<p align="center">
     <img src="main.png"></img>
-</div>
+</p>
 
 ### 3. Click on "Download Installation for Linux" for both SSL Network Extender and Check Point Mobile Access Portal Agent
-<div style="text-align:center">
+<p align="center">
     <img src="settings.png"></img>
-</div>
+</p>
 
-### 4.
+## Running the Shell Scripts
+
+**TODO**
+
+```bash
+$ chmod +x snx_install.sh
+$ chmod +x cshell_install.sh
+```
+
+**TODO**
+
+```bash
+$ ./snx_install.sh
+```
+
+**TODO**
+
+Here comes the tricky part: running the other shell script. The script will ask you for your password because it's going to run some things as `sudo`. Everything should be going fine until it gets to the last step: when it tries to run `/usr/bin/cshell/launcher`. That's where it gets stuck. This executable file does not work properly with `sudo`.
+
+```bash
+$ ./cshell_install.sh
+```
+
+When you notice it is stuck at the message below, open Ubuntu's system monitor and try to find a process called `launcher` with 0% CPU usage and `Sleeping` status. Once you find it, kill it.
+
+```
+Starting Mobile Access Portal Agent...
+```
+
+Do not ever type `CTRL+C` on the terminal or try to end its process or `launcher`'s. You must kill the `launcher` process. Otherwise, the script will do a clean-up and erase everything it has made that will allow you to make Check Point Mobile Access VPN work.
+
+If you've done everything right, there should be an executable file called `launcher` at `/usr/bin/cshell/`. If so, run it and there should be the following two lines of log:
+
+```
+$ /usr/bin/cshell/launcher
+LAUNCHER> Starting CShell...
+LAUNCHER> CShell Started
+```
+
+It means it has successfully been installed, and you should be fine trying to connect to the VPN now, but it doesn't mean we don't have more work to do.
+
+## Post-install
+
+You need to disable one of your system's startup applications. You should be able to see one of them called `cshell` with a marked checkbox. All it does is running the `launcher` executable file in `/usr/bin/cshell/`. You must uncheck it because every time you let it run automatically it's going to be run as `sudo`, which means it's going to get stuck.
+
+Now we're going to do a little trick to make it start automatically without `sudo`: run it inside the `.bashrc` file, so every time you open up a terminal it's going to run with your user normal permissions. Actually, we only want it to run it once when you log in, right? So why don't we simply run it inside `.profile`? Because everything in `.profile` run as `sudo`, so the `launcher` is going to get stuck.
+
+So here is the tricky part: let's create a simple log file to check whether `launcher` should run every time you open up a terminal window. Add the following lines to the `.profile` file to remove the log file every time you log in.
+
+```bash
+if [ -f "/home/[MY-USER-NAME]/cshell_launcher.log" ]; then
+    rm /home/[MY-USER-NAME]/cshell_launcher.log
+fi
+```
+
+On the `.bashrc` file add the following lines to check whether it should run the `launcher` file every time you open up a terminal window:
+
+```bash
+if [ ! -f "/home/[MY-USER-NAME]/cshell_launcher.log" ]; then
+    /usr/bin/cshell/launcher > /home/[MY-USER-NAME]/cshell_launcher.log
+fi
+```
+
+Restart your computer, log into your user account and check if the log file we created is on your home directory by opening a terminal and typing:
+
+```bash
+$ ls | grep cshell
+cshell_launcher.log
+```
+
+Then show its contents by using `cat` and it should be displayed as the following:
+
+```bash
+$ cat cshell_launcher.log 
+LAUNCHER> Starting CShell...
+LAUNCHER> CShell Started
+```
+
+Now you should be all set. Open your company's Check Point Mobile Access page and you should be able to connect everytime you log into your computer. Just remember to open up a terminal window first :)
