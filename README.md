@@ -1,7 +1,7 @@
 # Linux setup Check Point Mobile Access VPN
 
 <p align="center">
-    <img style="background-color:white" src="https://www.checkpoint.com/wp-content/themes/checkpoint-theme-v2/images/cp-logo-3x.png.pagespeed.ce.giMz7NxZUR.png"></img>
+    <img style="background-color:white" src="https://www.checkpoint.com/wp-content/themes/checkpoint-theme-v2/images/cp-logo-3x.png.pagespeed.ce.giMz7NxZUR.png"/>
 </p>
 
 This is a step-by-step tutorial to setup your Linux machine with all the required dependencies to work with [Check Point Mobile Access VPN](https://www.checkpoint.com/products/mobile-access/). This tutorial also includes some troubleshooting.
@@ -80,18 +80,18 @@ Both of them you can get on your company's Mobile Access VPN page.
 ### 1. Login
 
 <p align="center">
-    <img src="login.png"></img>
+    <img src="login.png"/>
 </p>
 
 
 ### 2. Click on "Settings" button
 <p align="center">
-    <img src="main.png"></img>
+    <img src="main.png"/>
 </p>
 
 ### 3. Click on "Download Installation for Linux" for both SSL Network Extender and Check Point Mobile Access Portal Agent
 <p align="center">
-    <img src="settings.png"></img>
+    <img src="settings.png"/>
 </p>
 
 ## Running the Shell Scripts
@@ -148,7 +148,7 @@ $ sudo rm /tmp/cshell.fifo
 You need to disable one of your system's startup applications. You should be able to see one of them called `cshell` with a marked checkbox. All it does is running the `launcher` executable file in `/usr/bin/cshell/`. You must uncheck it because every time you let it run automatically it's going to be run as `sudo`, which means it's going to get stuck.
 
 <p align="center">
-    <img src="startup.png"></img>
+    <img src="startup.png"/>
 </p>
 
 Now we're going to do a little trick to make it start automatically without `sudo`: run it inside the `.bashrc` file, so every time you open up a terminal it's going to run with your user normal permissions. Actually, we only want to run it once when you log in, right? So why don't we simply run it inside `.profile`? Because everything in `.profile` run as `sudo`, so the `launcher` is going to get stuck.
