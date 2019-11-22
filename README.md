@@ -65,7 +65,7 @@ $ sudo apt-get install libx11-6
 $ sudo dpkg --add-architecture i386
 $ sudo apt-get update
 $ sudo apt-get install multiarch-support
-$ sudo apt-get install libc6:i386 libncurses5:i386 libstdc++6:i386 libstdc++5:i386 libpam0g:i386
+$ sudo apt-get install libx11-6:i386 libc6:i386 libncurses5:i386 libstdc++6:i386 libstdc++5:i386 libpam0g:i386
 ```
 
 ## Downloading the Shell Scripts
@@ -96,36 +96,36 @@ Both of them you can get on your company's Mobile Access VPN page.
 
 ## Running the Shell Scripts
 
-**TODO**
+The scripts you've just downloaded are just regular files. So we need to change their permissions to make them executable with the following commands:
 
 ```bash
 $ chmod +x snx_install.sh
 $ chmod +x cshell_install.sh
 ```
 
-**TODO**
+The first script we're going to run is the `snx_install.sh`, which should not give any errors when installing it.
 
 ```bash
 $ ./snx_install.sh
+Installation successfull
 ```
-
-**TODO**
 
 Here comes the tricky part: running the other shell script. The script will ask you for your password because it's going to run some things as `sudo`. Everything should be going fine until it gets to the last step: when it tries to run `/usr/bin/cshell/launcher`. That's where it gets stuck. This executable file does not work properly with `sudo`.
 
 ```bash
 $ ./cshell_install.sh
-```
-
-When you notice it is stuck at the message below, open Ubuntu's system monitor and try to find a process called `launcher` with 0% CPU usage and `Sleeping` status. Once you find it, kill it.
-
-```
+Start Check Point Mobile Access Portal Agent installation
+Extracting Mobile Access Portal Agent... Done
+Installing Mobile Access Portal Agent... Done
+Installing certificate... Done
 Starting Mobile Access Portal Agent...
 ```
 
+When you notice it is stuck at the message above, open Ubuntu's system monitor and try to find a process called `launcher` with 0% CPU usage and `Sleeping` status. Once you find it, kill it.
+
 Do not ever type `CTRL+C` on the terminal or try to end its process or `launcher`'s. You must kill the `launcher` process. Otherwise, the script will do a clean-up and erase everything it has made that will allow you to make Check Point Mobile Access VPN work.
 
-If you've done everything right, there should be an executable file called `launcher` at `/usr/bin/cshell/`. If so, run it and there should be the following two lines of log:
+If you've done everything right, there should be an executable file called `launcher` at `/usr/bin/cshell/`. If so, run it and it should have been displayed some logs as follows:
 
 ```
 $ /usr/bin/cshell/launcher
@@ -135,11 +135,23 @@ LAUNCHER> CShell Started
 
 It means it has successfully been installed, and you should be fine trying to connect to the VPN now, but it doesn't mean we don't have more work to do.
 
+## Troubleshooting
+
+If you end up with an error when you're trying to run `/usr/bin/cshell/launcher` about a named pipe file called `cshell.fifo` inside the `/tmp` folder, just delete it with:
+
+```bash
+$ sudo rm /tmp/cshell.fifo
+```
+
 ## Post-install
 
 You need to disable one of your system's startup applications. You should be able to see one of them called `cshell` with a marked checkbox. All it does is running the `launcher` executable file in `/usr/bin/cshell/`. You must uncheck it because every time you let it run automatically it's going to be run as `sudo`, which means it's going to get stuck.
 
-Now we're going to do a little trick to make it start automatically without `sudo`: run it inside the `.bashrc` file, so every time you open up a terminal it's going to run with your user normal permissions. Actually, we only want it to run it once when you log in, right? So why don't we simply run it inside `.profile`? Because everything in `.profile` run as `sudo`, so the `launcher` is going to get stuck.
+<p align="center">
+    <img src="startup.png"></img>
+</p>
+
+Now we're going to do a little trick to make it start automatically without `sudo`: run it inside the `.bashrc` file, so every time you open up a terminal it's going to run with your user normal permissions. Actually, we only want to run it once when you log in, right? So why don't we simply run it inside `.profile`? Because everything in `.profile` run as `sudo`, so the `launcher` is going to get stuck.
 
 So here is the tricky part: let's create a simple log file to check whether `launcher` should run every time you open up a terminal window. Add the following lines to the `.profile` file to remove the log file every time you log in.
 
